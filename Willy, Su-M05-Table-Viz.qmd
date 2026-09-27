@@ -184,16 +184,12 @@ This assignment demonstrated how tables can be used as an important complement t
 
 For my MSDM CEP project, these skills can later be applied to actual digital marketing and consumer research data. In particular, AO5 can use similar table structures to communicate findings related to consumer trust, credibility, and consultation intention once the project data and research design have been finalized.
 
-# Appendix
+## Appendix
 
-## GitHub Repository
+### GitHub Repository
 
-The GitHub repository for the group project can be linked here after confirming the final repository URL:
+[Willy-Su-M05-Table-Viz GitHub Repository](https://github.com/WillySuu/Willy-Su-M05-Table-Viz)
 
-[Group 6 PhD Orthodontics GitHub Repository](https://github.com/Sheilaaa0312/Group-6-PhD-Orthodontics)
+### GitHub Pages
 
-## GitHub Pages
-
-The published HTML report link should be added here after the M05 report has been published through GitHub Pages:
-
-[GitHub Pages Report](#)
+[Published M05 HTML Report](https://willysuu.github.io/Willy-Su-M05-Table-Viz/)
