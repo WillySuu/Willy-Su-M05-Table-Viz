@@ -1,0 +1,199 @@
+---
+title: "M05-Visualizing Data with Tables for MSDM CEP"
+author: "Willy Su"
+date: '`r format(Sys.time())`'
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-link: true
+    embed-resources: true
+    theme: cosmo
+    code-fold: true
+    code-tools: true
+    code-overflow: wrap
+editor: visual
+execute:
+  freeze: auto
+---
+
+# Introduction
+
+## Project Context
+
+The MSDM Culminating Experience Project focuses on PhD Orthodontics and its digital marketing strategy as the practice expands its visibility from San Gabriel into the Chino Hills market. The project considers website optimization, SEO, content marketing, Google Ads, and consumer insights.
+
+My assigned Analytics Objective (AO5) focuses on **Consumer Insights and Customer Behavior**. In particular, the objective is to understand prospective patients' trust, credibility perceptions, and consultation intent in response to digital marketing content and the website experience.
+
+Because the CEP team does not yet have a finalized project dataset for this assignment, this report uses the `pizzaplace` dataset that is built into the `gt` package, as permitted in the assignment instructions.
+
+::: callout-note
+**Important data note:** The `pizzaplace` dataset is a practice dataset used to demonstrate the table-visualization techniques required for M05. It should not be interpreted as actual PhD Orthodontics or CEP data.
+:::
+
+# Reflection on Table Visualization
+
+## 1. What I Learned from the Videos
+
+The videos helped me understand that tables are an important part of data visualization, especially when the goal is to communicate detailed and precise information. I learned how the `gt` package in R can be used to create professional-looking tables from data frames and how different formatting options can improve readability. I also learned that tables can include titles, subtitles, labels, notes, footnotes, and different types of formatting to help readers understand the information more easily.
+
+Another important concept I learned was that data should be organized and formatted before creating a table. For example, variables can be grouped, renamed, and formatted so that the final table is easier for the audience to interpret. The videos also demonstrated how gtExtras can extend the functionality of gt and make tables more visually appealing and informative. Overall, I learned that effective tables should be designed with the audience and purpose of the analysis in mind.
+
+## 2. What I Like About `gt` and `gtExtras`
+
+One feature I particularly like about the `gt` package is that it allows users to create professional tables using relatively simple R code. Instead of manually formatting a table, I can define the table structure and then use functions to control labels, number formats, titles, subtitles, and notes. This makes the process more efficient and allows the formatting to be reproduced consistently.
+
+I also like `gtExtras` because it provides additional options for making tables more visually engaging. Additional formatting and visual elements can help readers quickly identify important information. These capabilities are especially useful for marketing analytics because a table may need to communicate analytical results to an audience that does not have a strong technical background. The combination of `gt` and `gtExtras` makes it possible to create tables that are both informative and visually professional.
+
+## 3. How Tables Complement Charts
+
+Tables and charts provide different but complementary ways to communicate information. Charts are useful for showing patterns, trends, comparisons, and relationships because visual elements allow readers to understand the overall message quickly. However, charts may not provide the exact values behind those patterns.
+
+Tables can provide the specific numbers that support what is shown in a chart. For example, a chart may show that one category generated more sales than another category, while a table can provide the exact number of pizzas sold, average price, and total sales for each category. Therefore, using a chart and a table together can provide both a quick visual summary and detailed numerical information. This combination can make the analysis more complete and useful for decision-making.
+
+## 4. When I Would Prefer Tables Rather Than Charts
+
+I would prefer to use tables when the audience needs to see exact values or compare multiple variables at the same time. Tables are particularly useful when the differences between values are relatively small and may be difficult to identify from a chart.
+
+For example, in an e-commerce or marketing analysis, a table could show traffic source, number of sessions, pageviews, conversion rate, and revenue for several marketing channels. A chart might make it easier to identify the overall trend, but the table would allow the audience to examine the exact values. Therefore, I would generally use tables when precision and detailed comparison are more important than quickly communicating an overall visual pattern.
+
+# Data Preparation
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(gt)
+library(gtExtras)
+
+data("pizzaplace", package = "gt")
+
+pizza_summary <- pizzaplace |>
+  mutate(
+    revenue = price
+  ) |>
+  group_by(type, size) |>
+  summarise(
+    pizzas_sold = n(),
+    average_price = mean(price, na.rm = TRUE),
+    total_revenue = sum(revenue, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(type, desc(pizzas_sold))
+```
+
+# Table Visualization
+
+## Sales and Pricing by Pizza Type
+
+The table below summarizes the number of pizzas sold, average price, and total revenue by pizza type and category. The table uses spanner columns to organize related measures and uses formatting features from `gt` and `gtExtras` to improve readability.
+
+```{r}
+#| label: tbl-pizza-summary
+#| tbl-cap: "Sales and Pricing Summary by Pizza Type and Category"
+
+pizza_table <- pizza_summary |>
+  gt(rowname_col = "size", groupname_col = "type") |>
+  tab_header(
+    title = md("**Pizza Sales and Pricing Summary**"),
+    subtitle = "A descriptive summary of sales volume and revenue by pizza category and type"
+  ) |>
+  tab_stubhead(label = "Pizza Size") |>
+  tab_spanner(
+    label = "Sales Volume",
+    columns = c(pizzas_sold)
+  ) |>
+  tab_spanner(
+    label = "Pricing & Revenue",
+    columns = c(average_price, total_revenue)
+  ) |>
+  cols_label(
+    pizzas_sold = "Pizzas Sold",
+    average_price = "Average Price",
+    total_revenue = "Total Revenue"
+  ) |>
+  fmt_number(
+    columns = pizzas_sold,
+    decimals = 0
+  ) |>
+  fmt_number(
+    columns = average_price,
+    decimals = 2,
+    pattern = "${x}"
+  ) |>
+  fmt_currency(
+    columns = total_revenue,
+    currency = "USD",
+    decimals = 2
+  ) |>
+  tab_source_note(
+    source_note = md("**Source:** `pizzaplace` dataset included with the `gt` package.")
+  ) |>
+  tab_footnote(
+    footnote = "Each row summarizes observed pizza orders in the practice dataset.",
+    locations = cells_column_labels(columns = c(pizzas_sold))
+  ) |>
+  tab_footnote(
+    footnote = "Total revenue is calculated as the sum of the observed pizza prices within each group.",
+    locations = cells_column_labels(columns = c(total_revenue))
+  ) |>
+  opt_row_striping() |>
+  tab_options(
+    table.font.size = px(13),
+    heading.title.font.size = px(20),
+    heading.subtitle.font.size = px(14),
+    column_labels.font.weight = "bold"
+  )
+
+pizza_table
+```
+
+Table @tbl-pizza-summary provides exact numerical values that can be used alongside charts. The table is particularly useful when a reader needs to compare several measures at the same time rather than only identify a visual pattern.
+
+::: callout-tip
+### Why this table is useful
+
+The table combines **sales volume**, **pricing**, and **revenue** in one view. This structure is similar to how a marketing analytics report can organize multiple performance indicators for comparison. For the CEP project, a similar table could eventually be used with actual website, search, advertising, or consumer-research data once those data become available.
+:::
+
+## Additional `gtExtras` Formatting
+
+The following example demonstrates an additional `gtExtras` feature by applying a table theme.
+
+```{r}
+#| label: tbl-pizza-themed
+#| tbl-cap: "Styled Version of the Pizza Sales Summary"
+
+pizza_table |>
+  gt_theme_538()
+```
+
+# Why the Table Is Worth Adding to the CEP Project
+
+Although the current table uses a practice dataset rather than actual CEP data, the same design principles can be applied to the MSDM project. The CEP project includes digital performance data such as website, Google Analytics, Google Search Console, Google Ads, keyword, and local-search data, as well as the possibility of survey or experimental data.
+
+For AO5, a future table could summarize measures such as trust, perceived credibility, information quality, website experience, and consultation intention. A well-designed table would allow the client and project team to see exact values and compare groups or variables without relying only on visual charts.
+
+The table is therefore worth adding to a written report or presentation because it provides numerical detail that may not be visible in a chart. It can also make the analysis easier to verify and can provide a compact reference for the client.
+
+# Conclusion
+
+This assignment demonstrated how tables can be used as an important complement to charts in data visualization. Using `gt` and `gtExtras`, I learned how to transform a basic data frame into a more professional table with titles, subtitles, labels, spanner columns, number formatting, source notes, footnotes, and additional styling.
+
+For my MSDM CEP project, these skills can later be applied to actual digital marketing and consumer research data. In particular, AO5 can use similar table structures to communicate findings related to consumer trust, credibility, and consultation intention once the project data and research design have been finalized.
+
+# Appendix
+
+## GitHub Repository
+
+The GitHub repository for the group project can be linked here after confirming the final repository URL:
+
+[Group 6 PhD Orthodontics GitHub Repository](https://github.com/Sheilaaa0312/Group-6-PhD-Orthodontics)
+
+## GitHub Pages
+
+The published HTML report link should be added here after the M05 report has been published through GitHub Pages:
+
+[GitHub Pages Report](#)
